@@ -25,7 +25,7 @@ html1 = req.text
 soup = BeautifulSoup(html1, 'html.parser')
 txt = soup.title.text
 
-l_d = soup.find_all('div', id='maincounter-wrap')
+l_d = soup.find_all('table', id='main_table_countries_today')
 t_b = soup.find('tbody')
 t_r = t_b.find_all('tr')
 
@@ -45,7 +45,7 @@ for tr in t_r:
     t_d.append(td[4].text)
     n_d.append(td[5].text)
     t_rec.append(td[6].text)
-    a_c.append(td[7].text)
+    a_c.append(td[8].text)
 
 headers = ['Country', 'Total Cases', 'Cases Today', 'Total Deaths', 'Deaths Today', 'Total Recovered',
            'Active Cases']
@@ -237,6 +237,12 @@ while i<=1:
 img_file = 'coronaindiamap.png'
 fig_img = base64.b64encode(open(img_file, 'rb').read())
 
+ts_fig = px.line(data1, x='Date', y='Active',
+                 title='Time Series Graph of Active Cases in India with Rangeslider (Move across the Slider Below.)',
+                 color="State", line_group="State", hover_name="State")
+ts_fig.update_xaxes(rangeslider_visible=True)
+ts_fig.update_layout(title_x=0.5)
+
 ts_fig1 = px.line(data1, x='Date', y='Confirmed',
                   title='Time Series Graph of Total Confirmed Cases in India with Rangeslider (Move across the Slider Below.)',
                   color="State", line_group="State", hover_name="State")
@@ -262,27 +268,28 @@ soup1 = BeautifulSoup(html2, 'html.parser')
 
 table_body = soup1.find('tbody')
 table_rows = table_body.find_all('tr')
-all_rows = table_body("tr")[:34]
+all_rows = table_body("tr")[:35]
 
 state = []
-cases = []
+acases = []
 cured = []
 death = []
+ccases = []
 
 for tr in all_rows:
     td = tr.find_all('td')
     state.append(td[1].text)
-    cases.append(td[2].text)
+    acases.append(td[2].text)
     cured.append(td[3].text)
     death.append(td[4].text)
+    ccases.append(td[5].text)
 
-col_headers = ['State/UT', 'Confirmed Cases', 'Recovered', 'Deaths']
-dat = pd.DataFrame(list(zip(state, cases, cured, death)), columns=col_headers)
+col_headers = ['State/UT', 'Confirmed Cases', 'Recovered', 'Deaths', 'Active Cases']
+dat = pd.DataFrame(list(zip(state, ccases, cured, death, acases)), columns=col_headers)
 
 dat['Confirmed Cases'] = dat['Confirmed Cases'].astype(int)
 dat['Recovered'] = dat['Recovered'].astype(int)
 dat['Deaths'] = dat['Deaths'].astype(int)
-dat['Active Cases'] = dat['Confirmed Cases'] - dat['Recovered'] - dat['Deaths']
 dat['Death Rate'] = (dat['Deaths'] / dat['Confirmed Cases'])
 dat['Death Rate'].replace(np.nan, 0.00, inplace=True)
 dat['Death Rate'] = dat['Death Rate'].apply('{:.0%}'.format)
@@ -317,7 +324,6 @@ external_stylesheets = [
 ]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
 server = app.server
 
 app.layout = html.Div([
@@ -353,6 +359,9 @@ app.layout = html.Div([
              style={'border': '0px white solid', 'display': 'inline-block', 'vertical-align': 'middle',
                     'width': '100%'}),
     html.Div(children=[dcc.Graph(id='india-bar-chart', figure=bfig)],
+             style={'border': '0px white solid', 'display': 'inline-block', 'vertical-align': 'middle',
+                    'width': '100%'}),
+    html.Div(children=[dcc.Graph(id='india-ts-graph', figure=ts_fig)],
              style={'border': '0px white solid', 'display': 'inline-block', 'vertical-align': 'middle',
                     'width': '100%'}),
     html.Div(children=[dcc.Graph(id='india-ts-graph1', figure=ts_fig1)],
