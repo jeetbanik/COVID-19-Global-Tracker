@@ -211,7 +211,7 @@ while x<(len(data1)/37)-1:
 
 data1['Active'] = data1['Confirmed'] - data1['Recovered'] - data1['Deaths']
 
-shp = ("Admin2.shp")
+shp = ("india.shp")
 map1 = gpd.read_file(shp)
 
 map1['ST_NM'].iloc[0] = 'Andaman and Nicobar Islands'
