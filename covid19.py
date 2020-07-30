@@ -25,7 +25,6 @@ html1 = req.text
 soup = BeautifulSoup(html1, 'html.parser')
 txt = soup.title.text
 
-l_d = soup.find_all('table', id='main_table_countries_today')
 t_b = soup.find('tbody')
 t_r = t_b.find_all('tr')
 
@@ -261,38 +260,14 @@ ts_fig3 = px.line(data1, x='Date', y='Deaths',
 ts_fig3.update_xaxes(rangeslider_visible=True)
 ts_fig3.update_layout(title_x=0.5)
 
-url1 = "https://www.mohfw.gov.in/#state-data"
-req1 = requests.get(url1)
-html2 = req1.text
-soup1 = BeautifulSoup(html2, 'html.parser')
+dat = pd.read_csv('https://api.covid19india.org/csv/latest/state_wise.csv')
+dat = dat[~dat.State.str.contains("State Unassigned")].iloc[1:,:5].sort_values(by=['State'])
 
-table_body = soup1.find('tbody')
-table_rows = table_body.find_all('tr')
-all_rows = table_body("tr")[:35]
-
-state = []
-acases = []
-cured = []
-death = []
-ccases = []
-
-for tr in all_rows:
-    td = tr.find_all('td')
-    state.append(td[1].text)
-    acases.append(td[2].text)
-    cured.append(td[3].text)
-    death.append(td[4].text)
-    ccases.append(td[5].text)
-
-col_headers = ['State/UT', 'Confirmed Cases', 'Recovered', 'Deaths', 'Active Cases']
-dat = pd.DataFrame(list(zip(state, ccases, cured, death, acases)), columns=col_headers)
-
-dat['Confirmed Cases'] = dat['Confirmed Cases'].astype(int)
-dat['Recovered'] = dat['Recovered'].astype(int)
-dat['Deaths'] = dat['Deaths'].astype(int)
-dat['Death Rate'] = (dat['Deaths'] / dat['Confirmed Cases'])
+dat['Death Rate'] = (dat['Deaths'] / dat['Confirmed'])
 dat['Death Rate'].replace(np.nan, 0.00, inplace=True)
 dat['Death Rate'] = dat['Death Rate'].apply('{:.0%}'.format)
+
+dat = dat.rename(columns={"State": "State/UT", "Confirmed": "Confirmed Cases", "Active": "Active Cases"})
 
 tfig = go.Figure(data=[go.Table(
     header=dict(values=list(dat.columns),
