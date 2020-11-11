@@ -157,7 +157,7 @@ ani_fig = px.choropleth(df,
                         )
 ani_fig.update_geos(lataxis_showgrid=True, lonaxis_showgrid=True)
 ani_fig.update_layout(
-    title_text='Spread of Coronavirus Cases over Time Globally (Click on the Play button Below or Move across the Slider.)',
+    title_text='Spread of Coronavirus Cases over Time Globally [JHU CSSE Data] (Click on the Play button Below or Move across the Slider.)',
     title_x=0.5,
     autosize=True,
     geo=dict(
