@@ -30,7 +30,7 @@ mkl-fft==1.0.15
 mkl-random==1.1.0
 mkl-service==2.3.0
 munch==2.5.0
-numpy==1.18.2
+numpy==1.22.0
 pandas==1.0.3
 plotly==4.6.0
 pyparsing==2.4.7
